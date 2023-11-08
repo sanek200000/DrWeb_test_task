@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Upload
+{% endblock %}
+
+{% block body %}
+  <h1>Command:</h1>
+  <h2>curl -u your_username:your_password -X POST -F "file=@path_to_file/filename" http://localhost:5000/upload</h2>
+{% endblock %}
