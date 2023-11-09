@@ -1,4 +1,5 @@
-from flask import Flask, request, send_file, render_template
+from tempfile import NamedTemporaryFile
+from flask import Flask, request, send_file, render_template, jsonify
 import os
 import hashlib
 
@@ -10,9 +11,9 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 # Хэш
-def generate_file_hash(filename):
+def generate_file_hash(file):
     sha256 = hashlib.sha256()
-    with open(filename, "rb") as f:
+    with open(file, "rb") as f:
         while True:
             data = f.read(65536)  # Чтение блоками
             if not data:
@@ -64,15 +65,21 @@ def upload_file():
 
     if file:
         # Вычислить хэш файла
-        file_hash = generate_file_hash(file.filename)
+        with NamedTemporaryFile(delete=False) as temp_file:
+            print(f"{temp_file.name = }")
+            file.save(temp_file.name)
+            file_hash = generate_file_hash(temp_file.name)
 
         # Создать подкаталог
         subfolder = os.path.join(app.config["UPLOAD_FOLDER"], file_hash[:2])
         os.makedirs(subfolder, exist_ok=True)
 
         # Сохранить файл с именем хэша
+        file.seek(0)
         file.save(os.path.join(subfolder, file_hash))
-        return file_hash, 201
+        data = {"path": subfolder, "hash": file_hash}
+        # return file_hash, 201
+        return jsonify(data)
     else:
         return "File upload failed", 400
 
@@ -81,7 +88,6 @@ def upload_file():
 def download_file(file_hash):
     # Путь к файлу
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], file_hash[:2], file_hash)
-    print(f"{file_path = }")
 
     if os.path.isfile(file_path):
         return send_file(file_path)
