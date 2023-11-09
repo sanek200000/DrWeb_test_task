@@ -71,9 +71,7 @@ def upload_file():
         os.makedirs(subfolder, exist_ok=True)
 
         # Сохранить файл с именем хэша
-        ext = file.filename.split(".")[-1]  # type: ignore
-        file.save(os.path.join(subfolder, f"{file_hash}.{ext}"))
-        # file.save(os.path.join(subfolder, file_hash))  # type: ignore
+        file.save(os.path.join(subfolder, file_hash))
         return file_hash, 201
     else:
         return "File upload failed", 400
