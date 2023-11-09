@@ -66,7 +66,6 @@ def upload_file():
     if file:
         # Вычислить хэш файла
         with NamedTemporaryFile(delete=False) as temp_file:
-            print(f"{temp_file.name = }")
             file.save(temp_file.name)
             file_hash = generate_file_hash(temp_file.name)
 
